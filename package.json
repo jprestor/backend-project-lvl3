@@ -4,12 +4,16 @@
   "description": "[![Actions Status](https://github.com/jprestor/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/jprestor/backend-project-lvl3/actions)",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "NODE_OPTIONS=--experimental-vm-modules npx jest"
+  },
+  "bin": {
+    "page-loader": "bin/page-loader.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jprestor/backend-project-lvl3.git"
   },
+  "type": "module",
   "author": "Dmitriy Miroshnichenko",
   "license": "ISC",
   "bugs": {
