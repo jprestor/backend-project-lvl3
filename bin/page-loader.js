@@ -15,7 +15,7 @@ program
     cwd(),
   )
   .action((url, options) => {
-    console.log(pageLoader(url, options.output));
+    pageLoader(url, options.output).then((path) => console.log(path));
   });
 
 program.parse();

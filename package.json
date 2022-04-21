@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/jprestor/backend-project-lvl3#readme",
   "dependencies": {
+    "axios": "^0.26.1",
     "commander": "^9.2.0",
     "lodash": "^4.17.21"
   },
