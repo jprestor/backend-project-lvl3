@@ -35,7 +35,7 @@ beforeEach(async () => {
   endPath = path.join(endDir, filename);
 });
 
-test('pageLoader', async () => {
+it('write file and return path', async () => {
   const { host, pathname } = url;
   nock(host).get(pathname).reply(200, expectedData);
   const resultPath = await pageLoader(`${host}${pathname}`, endDir);
