@@ -1,6 +1,6 @@
 import { cwd } from 'process';
 import { URL } from 'url';
-import { promises as fsp } from 'fs';
+import { promises as fs } from 'fs';
 import { resolve } from 'path';
 import axios from 'axios';
 
@@ -23,7 +23,7 @@ const pageLoader = (url, output = cwd()) => {
     .get(url)
     .then((response) => {
       const { data } = response;
-      return fsp.writeFile(outputPath, data);
+      return fs.writeFile(outputPath, data);
     })
     .then(() => resolve(outputPath));
 };

@@ -23,7 +23,8 @@
   "dependencies": {
     "axios": "^0.26.1",
     "commander": "^9.2.0",
-    "lodash": "^4.17.21"
+    "lodash": "^4.17.21",
+    "nock": "^13.2.4"
   },
   "devDependencies": {
     "eslint": "^8.13.0",
