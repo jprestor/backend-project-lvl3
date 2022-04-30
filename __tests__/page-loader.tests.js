@@ -1,46 +1,49 @@
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { promises as fs } from 'fs';
+import { promises as fs, constants } from 'fs';
 import nock from 'nock';
 import os from 'os';
 import pageLoader from '../src/index';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const getFixturePath = (filename) => {
-  const { join } = path;
-  return join(__dirname, '..', '__fixtures__', filename);
-};
+const getFixturePath = (filename) =>
+  path.join(__dirname, '..', '__fixtures__', filename);
+
+const readFixture = async (filename, encoding = 'utf-8') =>
+  fs.readFile(getFixturePath(filename), encoding);
 
 nock.disableNetConnect();
 
-let url;
-let filename;
-let endDir;
-let endPath;
-let expectedData;
+const host = 'https://ru.hexlet.io';
+const pathname = '/courses';
+let outputDir;
+let outputPath;
+let inputHTML;
+let expectedHTML;
+const expectedAssetPath =
+  'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png';
 
 beforeAll(async () => {
-  url = {
-    host: 'https://ru.hexlet.io',
-    pathname: '/courses',
-  };
-  filename = 'ru-hexlet-io-courses.html';
-  const fixturePath = getFixturePath(filename);
-  expectedData = await fs.readFile(fixturePath, 'utf-8');
+  inputHTML = await readFixture('original.html');
+  expectedHTML = await readFixture('expected.html');
 });
 
 beforeEach(async () => {
-  endDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  endPath = path.join(endDir, filename);
+  outputDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
+  outputPath = path.join(outputDir, 'ru-hexlet-io-courses.html');
 });
 
 it('write file and return path', async () => {
-  const { host, pathname } = url;
-  nock(host).get(pathname).reply(200, expectedData);
-  const resultPath = await pageLoader(`${host}${pathname}`, endDir);
-  const resultData = await fs.readFile(endPath, 'utf-8');
+  nock(host).get(pathname).reply(200, inputHTML); // expectedHTML
+  const resultPath = await pageLoader(`${host}${pathname}`, outputDir);
+  const resultHTML = await fs.readFile(outputPath, 'utf-8');
+  const assetExist = await fs
+    .access(expectedAssetPath, constants.F_OK)
+    .then(() => true)
+    .catch(() => false);
 
-  expect(resultPath).toEqual(endPath);
-  expect(resultData).toEqual(expectedData);
+  expect(resultPath).toEqual(outputPath);
+  expect(resultHTML).toEqual(expectedHTML);
+  expect(assetExist).toBeTruthy();
 });
