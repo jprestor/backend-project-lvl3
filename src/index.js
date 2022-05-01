@@ -1,61 +1,81 @@
 import { cwd } from 'process';
 import { URL } from 'url';
 import { promises as fs } from 'fs';
-import { resolve, join, extname, basename } from 'path';
+import path from 'path';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
+import prettier from 'prettier';
+import genFilename from './genFilename.js';
 
-const genFilename = (url) => {
-  const regex = /[^0-9a-zA-Z]/g;
-  return url.replace(regex, '-');
+const filterSupportedAssets = (rootOrigin) => (asset) => {
+  const formats = ['.png', '.jpg'];
+  const src = asset.attr('src');
+  const { origin, pathname } = new URL(src, rootOrigin);
+  const ext = path.extname(pathname);
+  const isLocal = origin === rootOrigin;
+  const isSupported = formats.includes(ext);
+
+  return isLocal && isSupported;
+};
+
+const fetchAsset = (href) => () =>
+  axios.get(href, { responseType: 'arraybuffer' }).then(({ data }) => data);
+
+const writeAsset = (href, output) => (data) => {
+  const filename = genFilename(href);
+  const writePath = path.join(output, filename);
+  return fs.writeFile(writePath, data);
+};
+
+const changeAssetSrc = (asset, href, dirname) => () => {
+  const filename = genFilename(href);
+  const assetNewSrc = path.join(dirname, filename);
+  asset.attr('src', assetNewSrc);
 };
 
 const pageLoader = (url, output = cwd()) => {
-  const { origin, host, pathname } = new URL(url);
-  const filename = genFilename(`${host}`);
-  const assetsFormats = ['.png', '.jpg'];
-  const outputHtmlPath = join(output, `${filename}.html`);
-  const outputAssetsPath = join(output, `${filename}_files`);
+  const { origin } = new URL(url);
+  const rootName = genFilename(url);
+  const outputHtmlPath = path.join(output, `${rootName}.html`);
+  const assetsDirName = `${rootName}_files`;
+  const outputAssetsPath = path.join(output, assetsDirName);
 
   let $;
+  const assets = [];
 
   return fs
     .mkdir(outputAssetsPath)
-    .catch(() => {})
+    .catch(() => console.log('Assets dir already exists'))
     .then(() => axios.get(url))
     .then(({ data }) => {
       $ = cheerio.load(data);
-      return fs.writeFile(outputHtmlPath, data);
+
+      function getAssets() {
+        assets.push($(this));
+      }
+
+      $('img').each(getAssets);
+
+      const promises = assets
+        .filter(filterSupportedAssets(origin))
+        .map((asset) => {
+          const src = asset.attr('src');
+          const { href } = new URL(src, origin);
+
+          return Promise.resolve()
+            .then(fetchAsset(href))
+            .then(writeAsset(href, outputAssetsPath))
+            .then(changeAssetSrc(asset, href, assetsDirName));
+        });
+
+      return Promise.all(promises);
     })
     .then(() => {
-      const initPromise = Promise.resolve([]);
-
-      $('img').each(function () {
-        const src = $(this).attr('src');
-        const { host: assetHost, href } = new URL(src, origin);
-        const extName = extname(src);
-        const baseName = basename(src, extName);
-        const isLocal = assetHost === host;
-        const isSupported = assetsFormats.includes(extName);
-
-        console.log(src);
-        if (isLocal && isSupported) {
-          initPromise
-            .then(() => axios.get(href, { responseType: 'arraybuffer' }))
-            .then(({ data: assetData }) => {
-              const assetFilename = genFilename(`${host}${baseName}`);
-              const outputFilePath = join(
-                outputAssetsPath,
-                `${assetFilename}${extName}`,
-              );
-              return fs.writeFile(outputFilePath, assetData, '');
-            });
-        }
-      });
-
-      return initPromise;
+      const html = $.root().html();
+      const prettified = prettier.format(html, { parser: 'html' });
+      return fs.writeFile(outputHtmlPath, prettified);
     })
-    .then(() => resolve(outputHtmlPath));
+    .then(() => path.resolve(outputHtmlPath));
 };
 
 export default pageLoader;

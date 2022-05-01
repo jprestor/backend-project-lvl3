@@ -1,6 +1,6 @@
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { promises as fs, constants } from 'fs';
+import { promises as fs } from 'fs';
 import nock from 'nock';
 import os from 'os';
 import pageLoader from '../src/index';
@@ -17,33 +17,38 @@ nock.disableNetConnect();
 
 const host = 'https://ru.hexlet.io';
 const pathname = '/courses';
+const assetPath = '/assets/professions/nodejs.png';
 let outputDir;
-let outputPath;
+let outputHtmlPath;
+let outputAssetPath;
 let inputHTML;
+let inputAsset;
 let expectedHTML;
-const expectedAssetPath =
-  'ru-hexlet-io-courses_files/ru-hexlet-io-assets-professions-nodejs.png';
 
 beforeAll(async () => {
   inputHTML = await readFixture('original.html');
+  inputAsset = await readFixture(assetPath, '');
   expectedHTML = await readFixture('expected.html');
 });
 
 beforeEach(async () => {
   outputDir = await fs.mkdtemp(path.join(os.tmpdir(), 'page-loader-'));
-  outputPath = path.join(outputDir, 'ru-hexlet-io-courses.html');
+  outputHtmlPath = path.join(outputDir, 'ru-hexlet-io-courses.html');
+  outputAssetPath = path.join(
+    outputDir,
+    'ru-hexlet-io-courses_files',
+    'ru-hexlet-io-assets-professions-nodejs.png',
+  );
 });
 
 it('write file and return path', async () => {
-  nock(host).get(pathname).reply(200, inputHTML); // expectedHTML
+  nock(host).get(pathname).reply(200, inputHTML);
+  nock(host).get(assetPath).reply(200, inputAsset);
   const resultPath = await pageLoader(`${host}${pathname}`, outputDir);
-  const resultHTML = await fs.readFile(outputPath, 'utf-8');
-  const assetExist = await fs
-    .access(expectedAssetPath, constants.F_OK)
-    .then(() => true)
-    .catch(() => false);
+  const resultHTML = await fs.readFile(outputHtmlPath, 'utf-8');
+  const resultAsset = await fs.readFile(outputAssetPath, '');
 
-  expect(resultPath).toEqual(outputPath);
+  expect(resultPath).toEqual(outputHtmlPath);
   expect(resultHTML).toEqual(expectedHTML);
-  expect(assetExist).toBeTruthy();
+  expect(resultAsset).toEqual(inputAsset);
 });

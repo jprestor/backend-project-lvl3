@@ -34,4 +34,4 @@ page-loader -h
 ## Demo
 
 Load page and return its output path
-[![asciicast](https://asciinema.org/a/VAmdo76HSQYm81SerhYjxa9Z8.svg)](https://asciinema.org/a/VAmdo76HSQYm81SerhYjxa9Z8)
+[![asciicast](https://asciinema.org/a/491443.svg)](https://asciinema.org/a/491443)
