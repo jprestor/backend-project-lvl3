@@ -7,30 +7,43 @@ import * as cheerio from 'cheerio';
 import prettier from 'prettier';
 import genFilename from './genFilename.js';
 
-const filterSupportedAssets = (rootOrigin) => (asset) => {
-  const formats = ['.png', '.jpg'];
-  const src = asset.attr('src');
-  const { origin, pathname } = new URL(src, rootOrigin);
-  const ext = path.extname(pathname);
-  const isLocal = origin === rootOrigin;
-  const isSupported = formats.includes(ext);
-
-  return isLocal && isSupported;
+const getAttrName = (asset) => {
+  if (asset.attr('src')) {
+    return 'src';
+  }
+  return 'href';
 };
 
-const fetchAsset = (href) => () =>
-  axios.get(href, { responseType: 'arraybuffer' }).then(({ data }) => data);
+const filterLocalAssets = (rootOrigin) => (asset) => {
+  const src = asset.attr(getAttrName(asset));
+  const { origin } = new URL(src, rootOrigin);
+  const isLocal = origin === rootOrigin;
+  const isHasSrc = src !== undefined;
+  return isLocal && isHasSrc;
+};
+
+const fetchAsset = (href) => () => {
+  const { pathname } = new URL(href);
+  const { ext } = path.parse(pathname);
+  const responseType = ext ? 'arraybuffer' : 'document';
+
+  return axios.get(href, { responseType }).then(({ data }) => data);
+};
 
 const writeAsset = (href, output) => (data) => {
   const filename = genFilename(href);
+  const { pathname } = new URL(href);
+  const { ext } = path.parse(pathname);
   const writePath = path.join(output, filename);
-  return fs.writeFile(writePath, data);
+  return fs.writeFile(`${writePath}${ext || '.html'}`, data);
 };
 
 const changeAssetSrc = (asset, href, dirname) => () => {
   const filename = genFilename(href);
-  const assetNewSrc = path.join(dirname, filename);
-  asset.attr('src', assetNewSrc);
+  const { pathname } = new URL(href);
+  const { ext } = path.parse(pathname);
+  const assetNewSrc = path.join(dirname, `${filename}${ext || '.html'}`);
+  asset.attr(getAttrName(asset), assetNewSrc);
 };
 
 const pageLoader = (url, output = cwd()) => {
@@ -54,19 +67,17 @@ const pageLoader = (url, output = cwd()) => {
         assets.push($(this));
       }
 
-      $('img').each(getAssets);
+      $('img, link, script').each(getAssets);
 
-      const promises = assets
-        .filter(filterSupportedAssets(origin))
-        .map((asset) => {
-          const src = asset.attr('src');
-          const { href } = new URL(src, origin);
+      const promises = assets.filter(filterLocalAssets(origin)).map((asset) => {
+        const src = asset.attr(getAttrName(asset));
+        const { href } = new URL(src, origin);
 
-          return Promise.resolve()
-            .then(fetchAsset(href))
-            .then(writeAsset(href, outputAssetsPath))
-            .then(changeAssetSrc(asset, href, assetsDirName));
-        });
+        return Promise.resolve()
+          .then(fetchAsset(href))
+          .then(writeAsset(href, outputAssetsPath))
+          .then(changeAssetSrc(asset, href, assetsDirName));
+      });
 
       return Promise.all(promises);
     })
