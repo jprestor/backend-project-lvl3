@@ -25,8 +25,7 @@ const filterLocalAssets = (rootOrigin) => (asset) => {
 const fetchAsset = (href) => () => {
   const { pathname } = new URL(href);
   const { ext } = path.parse(pathname);
-  const responseType = ext ? 'arraybuffer' : 'document';
-
+  const responseType = ext ? 'arraybuffer' : '';
   return axios.get(href, { responseType }).then(({ data }) => data);
 };
 

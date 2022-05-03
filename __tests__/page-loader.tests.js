@@ -61,10 +61,10 @@ it('load html and return its path', async () => {
     `${outputAssetPath}/ru-hexlet-io-packs-js-runtime.js`,
     '',
   );
-  const resultAssetHTML = await fs.readFile(
-    `${outputAssetPath}/ru-hexlet-io-courses.html`,
-    '',
-  );
+  // const resultAssetHTML = await fs.readFile(
+  //   `${outputAssetPath}/ru-hexlet-io-courses.html`,
+  //   '',
+  // );
 
   expect(resultPath).toEqual(outputHtmlPath);
   expect(resultHTML).toEqual(expectedHTML);
