@@ -35,3 +35,6 @@ page-loader -h
 
 Load page and return its output path
 [![asciicast](https://asciinema.org/a/491443.svg)](https://asciinema.org/a/491443)
+
+Logging by [debug](https://www.npmjs.com/package/debug)
+[![asciicast](https://asciinema.org/a/jtPCutY8bstykUizeYlva8M3J.svg)](https://asciinema.org/a/jtPCutY8bstykUizeYlva8M3J)

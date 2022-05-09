@@ -3,9 +3,13 @@ import { URL } from 'url';
 import { promises as fs } from 'fs';
 import path from 'path';
 import axios from 'axios';
+import axiosDebugLog from 'axios-debug-log';
 import * as cheerio from 'cheerio';
 import prettier from 'prettier';
+import debug from 'debug';
 import genFilename from './genFilename.js';
+
+const logMainEvents = debug('page-loader');
 
 const getAttrName = (asset) => {
   if (asset.attr('src')) {
@@ -55,10 +59,14 @@ const pageLoader = (url, output = cwd()) => {
   let $;
   const assets = [];
 
+  logMainEvents('create local directory for page assets');
   return fs
     .mkdir(outputAssetsPath)
     .catch(() => console.log('Assets dir already exists'))
-    .then(() => axios.get(url))
+    .then(() => {
+      logMainEvents(`fetch page from url: ${url}`);
+      return axios.get(url);
+    })
     .then(({ data }) => {
       $ = cheerio.load(data);
 
@@ -66,8 +74,10 @@ const pageLoader = (url, output = cwd()) => {
         assets.push($(this));
       }
 
+      logMainEvents('collect page assets by cheerio');
       $('img, link, script').each(getAssets);
 
+      logMainEvents('fetch assets sources and write it to files');
       const promises = assets.filter(filterLocalAssets(origin)).map((asset) => {
         const src = asset.attr(getAttrName(asset));
         const { href } = new URL(src, origin);
@@ -83,6 +93,7 @@ const pageLoader = (url, output = cwd()) => {
     .then(() => {
       const html = $.root().html();
       const prettified = prettier.format(html, { parser: 'html' });
+      logMainEvents('write main html');
       return fs.writeFile(outputHtmlPath, prettified);
     })
     .then(() => path.resolve(outputHtmlPath));
