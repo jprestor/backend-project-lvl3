@@ -7,11 +7,12 @@ import pageLoader from '../src/index';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-const getFixturePath = (filename) =>
-  path.join(__dirname, '..', '__fixtures__', filename);
+const getFixturePath = (filename) => path.join(__dirname, '..', '__fixtures__', filename);
 
-const readFixture = async (filename, encoding = 'utf-8') =>
-  fs.readFile(getFixturePath(filename), encoding);
+const readFixture = async (filename, encoding = 'utf-8') => {
+  const fixturePath = getFixturePath(filename);
+  return fs.readFile(fixturePath, encoding);
+};
 
 nock.disableNetConnect();
 
