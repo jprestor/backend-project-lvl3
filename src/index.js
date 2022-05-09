@@ -3,7 +3,7 @@ import { URL } from 'url';
 import { promises as fs } from 'fs';
 import path from 'path';
 import axios from 'axios';
-import axiosDebugLog from 'axios-debug-log';
+import axiosDebugLog from 'axios-debug-log'; // eslint-disable-line no-unused-vars
 import * as cheerio from 'cheerio';
 import prettier from 'prettier';
 import debug from 'debug';
