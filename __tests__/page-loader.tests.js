@@ -92,13 +92,7 @@ it('fails with not exist url', async () => {
 });
 
 it('fails with not exist page', async () => {
-  expect.assertions(1);
   const wrongPathname = '/not/exist/page';
   nock(host).get(wrongPathname).reply(404);
-
-  try {
-    await pageLoader(`${host}${wrongPathname}`, outputDir);
-  } catch (e) {
-    expect(e.response.status).toBe(404);
-  }
+  await expect(pageLoader(`${host}${wrongPathname}`, outputDir)).rejects.toThrow();
 });
