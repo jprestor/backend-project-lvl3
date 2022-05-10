@@ -12,7 +12,7 @@ program
   .option('-o, --output [dir]', 'output dir (default: "/home/user/current-dir")', cwd())
   .action((url, options) => {
     pageLoader(url, options.output)
-      .then((path) => console.log(path))
+      .then((path) => console.log(`Page was successfully downloaded into: ${path}`))
       .catch((e) => {
         if (e.response) {
           console.error(`${e.message}, path: ${e.response.request.path}`);

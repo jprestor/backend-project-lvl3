@@ -36,12 +36,10 @@ page-loader -h
 ## Demo
 
 Load page and return its output path
-[![asciicast](https://asciinema.org/a/491443.svg)](https://asciinema.org/a/491443)
+[![asciicast](https://asciinema.org/a/493444.svg)](https://asciinema.org/a/493444)
 
 Logging by [debug](https://www.npmjs.com/package/debug)
 [![asciicast](https://asciinema.org/a/jtPCutY8bstykUizeYlva8M3J.svg)](https://asciinema.org/a/jtPCutY8bstykUizeYlva8M3J)
-
-[![asciicast](https://asciinema.org/a/493364.svg)](https://asciinema.org/a/493364)
 
 View error messages if something went wrong
 [![asciicast](https://asciinema.org/a/493364.svg)](https://asciinema.org/a/493364)

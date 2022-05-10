@@ -7,6 +7,7 @@ import axiosDebugLog from 'axios-debug-log'; // eslint-disable-line no-unused-va
 import * as cheerio from 'cheerio';
 import prettier from 'prettier';
 import debug from 'debug';
+import Listr from 'listr';
 import genFilename from './genFilename.js';
 
 const logger = debug('page-loader');
@@ -78,17 +79,24 @@ const pageLoader = (url, output = cwd()) => {
       $('img, link, script').each(getAssets);
 
       logger('fetch assets sources and write it to files');
-      const promises = assets.filter(filterLocalAssets(origin)).map((asset) => {
-        const src = asset.attr(getAttrName(asset));
-        const { href } = new URL(src, origin);
+      const tasks = new Listr(
+        assets.filter(filterLocalAssets(origin)).map((asset) => {
+          const src = asset.attr(getAttrName(asset));
+          const { href } = new URL(src, origin);
 
-        return Promise.resolve()
-          .then(fetchAsset(href))
-          .then(writeAsset(href, outputAssetsPath))
-          .then(changeAssetSrc(asset, href, assetsDirName));
-      });
+          return {
+            title: href,
+            task: () =>
+              Promise.resolve() // eslint-disable-line implicit-arrow-linebreak
+                .then(fetchAsset(href))
+                .then(writeAsset(href, outputAssetsPath))
+                .then(changeAssetSrc(asset, href, assetsDirName)),
+          };
+        }),
+        { concurrent: true },
+      );
 
-      return Promise.all(promises);
+      return tasks.run();
     })
     .then(() => {
       const html = $.root().html();
