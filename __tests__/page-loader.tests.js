@@ -96,8 +96,9 @@ it('fails with not exist page', async () => {
   const wrongPathname = '/not/exist/page';
   nock(host).get(wrongPathname).reply(404);
 
-  await pageLoader(`${host}${wrongPathname}`, outputDir).catch((e) => {
-    const responseStatus = e.response.status;
-    expect(responseStatus).toBe(404);
-  });
+  try {
+    await pageLoader(`${host}${wrongPathname}`, outputDir);
+  } catch (e) {
+    expect(e.response.status).toBe(404);
+  }
 });
