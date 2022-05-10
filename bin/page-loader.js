@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Command } from 'commander/esm.mjs';
-import { cwd, exit, exitCode } from 'process';
+import { cwd, exit } from 'process';
 import pageLoader from '../src/index.js';
 
 const program = new Command();
@@ -14,8 +14,6 @@ program
     pageLoader(url, options.output)
       .then((path) => console.log(path))
       .catch((e) => {
-        console.log('exitCode', exitCode);
-
         if (e.response) {
           console.error(`${e.message}, path: ${e.response.request.path}`);
         } else {
