@@ -5,6 +5,8 @@
 [![Hexlet Workflow Status](https://github.com/jprestor/backend-project-lvl3/workflows/hexlet-check/badge.svg)](https://github.com/jprestor/backend-project-lvl3/actions)
 [![My Workflow Status](https://github.com/jprestor/backend-project-lvl3/actions/workflows/my-workflow.yml/badge.svg)](https://github.com/jprestor/backend-project-lvl3/actions/workflows/my-workflow.yml)
 
+PageLoader is a command–line utility that downloads pages from the Internet and saves them on your computer. Together with the page, it downloads all resources (pictures, styles and js), making it possible to open the page without the Internet.
+
 ## Requirements
 
 Node.js version 14 and above
@@ -41,5 +43,5 @@ Logging by [debug](https://www.npmjs.com/package/debug)
 
 [![asciicast](https://asciinema.org/a/493364.svg)](https://asciinema.org/a/493364)
 
-If something went wrong
+View error messages if something went wrong
 [![asciicast](https://asciinema.org/a/493364.svg)](https://asciinema.org/a/493364)

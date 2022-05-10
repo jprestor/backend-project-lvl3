@@ -19,7 +19,7 @@ program
         } else {
           console.error(e.message);
         }
-        exit(1);
+        exit(e.code || 1);
       });
   });
 
