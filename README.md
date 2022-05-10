@@ -38,3 +38,8 @@ Load page and return its output path
 
 Logging by [debug](https://www.npmjs.com/package/debug)
 [![asciicast](https://asciinema.org/a/jtPCutY8bstykUizeYlva8M3J.svg)](https://asciinema.org/a/jtPCutY8bstykUizeYlva8M3J)
+
+[![asciicast](https://asciinema.org/a/493364.svg)](https://asciinema.org/a/493364)
+
+If something went wrong
+[![asciicast](https://asciinema.org/a/493364.svg)](https://asciinema.org/a/493364)
